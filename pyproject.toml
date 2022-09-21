@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyqurl"
+version = "0.0.2"
+dependencies = [
+
+]
+authors = [
+  { name="Gabriel Schneider", email="gabriel.schneider.almeida@gmail.com" },
+]
+description = "Simple query string parser for LHS filtering, sorting and pagination"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/gabriel-schneider/pyqurl"
+"Bug Tracker" = "https://github.com/gabriel-schneider/pyqurl/issues"
