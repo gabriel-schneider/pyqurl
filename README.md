@@ -1,7 +1,9 @@
 Simple query string parser for LHS filtering, sorting and pagination. This project is directly based on Qurl by Hector Carballo (https://github.com/hector-co/Qurl).
 
 # Installing 
-`$ pip install pyqurl`
+```
+$ pip install pyqurl
+```
 
 # Usage
 
