@@ -1,11 +1,10 @@
 from typing import List
 from pyqurl.core import Query, QueryPagination, QuerySort
+from pyqurl.helpers import str2bool
 from pyqurl.operations import *
 from pony.orm.core import desc
 
 
-def str2bool(v):
-  return str(v).lower() in ("yes", "true", "t", "1", "on")
 
 
 class PonyORMHelper:

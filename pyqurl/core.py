@@ -7,6 +7,8 @@ from urllib.parse import parse_qs
 from datetime import datetime
 
 from pyqurl.operations import *
+from pyqurl.helpers import str2bool
+from pyqurl.exceptions import UnknownOperatorError
 
 
 @dataclass
@@ -97,6 +99,9 @@ def parse_string_value(value: str) -> Any:
 def create_filters_from_dict(d: Dict):
     filters = []
     for key, value in d.items():
+        if key is None or key.strip() == "":
+            continue
+
         matches = re.search(QUERY_KEY_REGEX, key)
         prop, opvalue = matches.groups()
 
@@ -114,12 +119,21 @@ def create_filters_from_dict(d: Dict):
             value[i] = parse_string_value(value[i])          
             
 
-        op = OPERATIONS_BY_VALUE[opvalue]
+        try:
+            op = OPERATIONS_BY_VALUE[opvalue]
+        except KeyError:
+            raise UnknownOperatorError(opvalue)
+
         if op in [IN, NOT_IN]:
             f = ArrayValueQueryFilter(prop, op, value)
+
+        elif op == NOT_NULL:
+            f = SingleValueQueryFilter(prop, op, str2bool(value[0]))
+
         elif op == RANGE:
             start, end = value if value is not None else (None, None, )
             f = RangeValueQueryFilter(prop, op, start=start, end=end)
+
         else:           
             f = SingleValueQueryFilter(prop, op, value[0])
         
