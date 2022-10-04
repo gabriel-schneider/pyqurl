@@ -42,7 +42,7 @@ class QuerySort:
 @dataclass
 class QueryPagination:
     limit: int
-    offset: int
+    offset: Union[int, str]
 
 
 @dataclass
@@ -64,11 +64,26 @@ def create_query_from_dict(d: Dict) -> Query:
     args = {**d}
 
     offset = args.pop("offset", 0)
+    try:
+        offset = offset[0]
+    except IndexError:
+        pass
+
+    try:
+        offset = int(offset)
+    except ValueError:
+        pass
+
     limit = args.pop("limit", None)
-    pagination = QueryPagination(int(limit), int(offset)) if limit else None
+    try:
+        limit = limit[0]
+    except IndexError:
+        pass
+
+    pagination = QueryPagination(int(limit), offset) if limit else None
 
     sort = create_sort_from_string(args.pop("sort", None))
-    
+
     filters = create_filters_from_dict(args)
 
     return Query(filters, sort, pagination)
@@ -76,7 +91,7 @@ def create_query_from_dict(d: Dict) -> Query:
 
 def parse_string_value(value: str) -> Any:
     if value is None or value.lower().strip() == "null":
-        return None    
+        return None
 
     try:
         return datetime.fromisoformat(value)
@@ -115,9 +130,9 @@ def create_filters_from_dict(d: Dict):
             value = [value]
 
         # Try map every value to a number
-        for i in range(len(value)): 
-            value[i] = parse_string_value(value[i])          
-            
+        for i in range(len(value)):
+            value[i] = parse_string_value(value[i])
+
 
         try:
             op = OPERATIONS_BY_VALUE[opvalue]
@@ -134,9 +149,9 @@ def create_filters_from_dict(d: Dict):
             start, end = value if value is not None else (None, None, )
             f = RangeValueQueryFilter(prop, op, start=start, end=end)
 
-        else:           
+        else:
             f = SingleValueQueryFilter(prop, op, value[0])
-        
+
         filters.append(f)
 
     return filters
@@ -157,7 +172,7 @@ def create_sort_from_string(value: Union[str, List]):
         order, prop = re.search(QUERY_SORT_REGEX, v.strip()).groups()
         r.append(QuerySort(prop, order == "-"))
     return r
-    
+
 
 
 
