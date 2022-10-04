@@ -165,7 +165,7 @@ def create_sort_from_string(value: Union[str, List]):
     if isinstance(value, List):
         value = ",".join(value).split(",")
     else:
-        value = [value]
+        value = str(value).split(",")
 
     for v in value:
         if not v:

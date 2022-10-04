@@ -100,3 +100,45 @@ def test_pagination_with_dict():
     assert query.pagination is not None
     assert query.pagination.offset == "abc"
     assert query.pagination.limit == 10
+
+
+def test_sort_implicit_ascending():
+    query = create_query_from_string("sort=id")
+    assert query.sort is not None
+    assert query.sort[0].prop == "id"
+    assert query.sort[0].descending == False
+
+
+def test_sort_explicit_ascending():
+    query = create_query_from_string("sort=+id")
+    assert query.sort is not None
+    assert query.sort[0].prop == "id"
+    assert query.sort[0].descending == False
+
+
+def test_sort_descending():
+    query = create_query_from_string("sort=-id")
+    assert query.sort is not None
+    assert query.sort[0].prop == "id"
+    assert query.sort[0].descending == True
+
+def test_sort_multiples():
+    query = create_query_from_string("sort=id,name")
+    assert query.sort is not None
+
+    assert query.sort[0].prop == "id"
+    assert query.sort[0].descending == False
+
+    assert query.sort[1].prop == "name"
+    assert query.sort[1].descending == False
+
+
+def test_sort_descending():
+    query = create_query_from_string("sort=-id,-name")
+    assert query.sort is not None
+
+    assert query.sort[0].prop == "id"
+    assert query.sort[0].descending == True
+
+    assert query.sort[1].prop == "name"
+    assert query.sort[1].descending == True
