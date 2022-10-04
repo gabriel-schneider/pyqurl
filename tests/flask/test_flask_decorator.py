@@ -1,4 +1,4 @@
-from fixtures import app, client
+from .fixtures import app, client
 from pyqurl.web.flask import use_query_filters
 
 

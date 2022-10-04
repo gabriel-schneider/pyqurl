@@ -1,5 +1,5 @@
 import pytest
-from fixtures import app, client
+from .fixtures import app, client
 from pyqurl.web.quart import use_query_filters
 
 
