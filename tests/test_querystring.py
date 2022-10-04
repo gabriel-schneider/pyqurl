@@ -1,6 +1,6 @@
 import pytest
 
-from pyqurl import create_query_from_string
+from pyqurl import create_query_from_string, create_query_from_dict
 from pyqurl.exceptions import UnknownOperatorError
 from pyqurl.operations import *
 
@@ -87,6 +87,16 @@ def test_pagination():
 
 def test_pagination_with_string_offset():
     query = create_query_from_string("offset=abc&limit=10")
+    assert query.pagination is not None
+    assert query.pagination.offset == "abc"
+    assert query.pagination.limit == 10
+
+
+def test_pagination_with_dict():
+    query = create_query_from_dict({
+        "offset": ["abc"],
+        "limit": 10
+    })
     assert query.pagination is not None
     assert query.pagination.offset == "abc"
     assert query.pagination.limit == 10

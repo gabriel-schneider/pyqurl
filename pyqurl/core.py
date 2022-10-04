@@ -63,22 +63,23 @@ def create_query_from_string(q: str) -> Query:
 def create_query_from_dict(d: Dict) -> Query:
     args = {**d}
 
-    offset = args.pop("offset", 0)
-    try:
-        offset = offset[0]
-    except IndexError:
-        pass
+    if offset := args.pop("offset", 0):
+        offset = offset[0] if isinstance(offset, (list, tuple, )) else offset
+        try:
+            offset = int(offset)
+        except ValueError:
+            pass
 
-    try:
-        offset = int(offset)
-    except ValueError:
-        pass
 
-    limit = args.pop("limit", None)
-    try:
-        limit = limit[0]
-    except IndexError:
-        pass
+    if limit := args.pop("limit", None):
+        try:
+            limit = limit[0]
+
+        except IndexError:
+            pass
+
+        except TypeError:
+            pass
 
     pagination = QueryPagination(int(limit), offset) if limit else None
 
