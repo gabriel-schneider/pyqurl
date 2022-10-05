@@ -72,16 +72,10 @@ def create_query_from_dict(d: Dict) -> Query:
 
 
     if limit := args.pop("limit", None):
-        try:
-            limit = limit[0]
+        limit = int(limit[0] if isinstance(limit, (list, tuple, )) else limit)
 
-        except IndexError:
-            pass
 
-        except TypeError:
-            pass
-
-    pagination = QueryPagination(int(limit), offset) if limit else None
+    pagination = QueryPagination(limit, offset) if limit else None
 
     sort = create_sort_from_string(args.pop("sort", None))
 
