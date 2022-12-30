@@ -1,6 +1,7 @@
 
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+import dataclasses
 import re
 from typing import Any, Dict, List, Union
 from urllib.parse import parse_qs
@@ -12,23 +13,23 @@ from pyqurl.exceptions import UnknownOperatorError
 
 
 @dataclass
-class QueryFilter:
+class QueryCriterion:
     prop: str
     operation: FilterOperation
 
 
 @dataclass
-class SingleValueQueryFilter(QueryFilter):
+class SingleValueQueryCriterion(QueryCriterion):
     value: Any
 
 
 @dataclass
-class ArrayValueQueryFilter(QueryFilter):
+class ArrayValueQueryCriterion(QueryCriterion):
     value: List[Any]
 
 
 @dataclass
-class RangeValueQueryFilter(QueryFilter):
+class RangeValueQueryFilter(QueryCriterion):
     start: Any
     end: Any
 
@@ -46,21 +47,29 @@ class QueryPagination:
 
 
 @dataclass
-class Query:
-    filters: List[QueryFilter]
-    sort: List[QuerySort]
-    pagination: QueryPagination
+class QueryFilter:
+    criteria: List[QueryCriterion] = field(default_factory=list)
+    sort: List[QuerySort] = field(default_factory=list)
+    pagination: QueryPagination = None
+
+    def clone(self):
+        return QueryFilter(
+            [dataclasses.replace(x) for x in self.criteria] if self.criteria else [],
+            [dataclasses.replace(x) for x in self.sort] if self.sort else [],
+            dataclasses.replace(self.pagination) if self.pagination else None
+        )
+
 
 
 QUERY_KEY_REGEX = r"(\w*)[\[]?(\w*)?[\]]?"
 QUERY_SORT_REGEX = r"([-+])?(\w*)"
 
-def create_query_from_string(q: str) -> Query:
+def create_query_from_string(q: str) -> QueryFilter:
     d = parse_qs(q)
     return create_query_from_dict(d)
 
 
-def create_query_from_dict(d: Dict) -> Query:
+def create_query_from_dict(d: Dict) -> QueryFilter:
     args = {**d}
 
     if offset := args.pop("offset", 0):
@@ -81,7 +90,7 @@ def create_query_from_dict(d: Dict) -> Query:
 
     filters = create_filters_from_dict(args)
 
-    return Query(filters, sort, pagination)
+    return QueryFilter(filters, sort, pagination)
 
 
 def parse_string_value(value: str) -> Any:
@@ -105,6 +114,25 @@ def parse_string_value(value: str) -> Any:
 
     return value
 
+def create_criterion(prop, op, value):
+
+    if not isinstance(value, List):
+        value = [value]
+
+    if op in [IN, NOT_IN]:
+        f = ArrayValueQueryCriterion(prop, op, value)
+
+    elif op == NOT_NULL:
+        f = SingleValueQueryCriterion(prop, op, str2bool(value[0]))
+
+    elif op == RANGE:
+        start, end = value if value is not None else (None, None, )
+        f = RangeValueQueryFilter(prop, op, start=start, end=end)
+
+    else:
+        f = SingleValueQueryCriterion(prop, op, value[0])
+
+    return f
 
 def create_filters_from_dict(d: Dict):
     filters = []
@@ -134,18 +162,7 @@ def create_filters_from_dict(d: Dict):
         except KeyError:
             raise UnknownOperatorError(opvalue)
 
-        if op in [IN, NOT_IN]:
-            f = ArrayValueQueryFilter(prop, op, value)
-
-        elif op == NOT_NULL:
-            f = SingleValueQueryFilter(prop, op, str2bool(value[0]))
-
-        elif op == RANGE:
-            start, end = value if value is not None else (None, None, )
-            f = RangeValueQueryFilter(prop, op, start=start, end=end)
-
-        else:
-            f = SingleValueQueryFilter(prop, op, value[0])
+        f = create_criterion(prop, op, value)
 
         filters.append(f)
 

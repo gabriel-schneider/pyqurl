@@ -1,5 +1,5 @@
 from typing import List
-from pyqurl.core import Query, QueryPagination, QuerySort
+from pyqurl.core import QueryFilter, QueryPagination, QuerySort
 from pyqurl.helpers import str2bool
 from pyqurl.operations import *
 from pony.orm.core import desc
@@ -20,7 +20,7 @@ class PonyORMHelper:
 
             elif f.operation == NOT_EQUAL:
                 query = query.filter(lambda x: getattr(x, f.prop) != f.value)
-                
+
             elif f.operation == CONTAINS:
                 if isinstance(f.value, str):
                     query = query.filter(lambda x: f.value.lower() in getattr(x, f.prop).lower())
@@ -33,7 +33,7 @@ class PonyORMHelper:
                 else:
                     query = query.filter(lambda x: getattr(x, f.prop) is None)
 
-        return query    
+        return query
 
     @classmethod
     def apply_pagination(cls, query, pagination: QueryPagination):
@@ -55,11 +55,11 @@ class PonyORMHelper:
         return query
 
     @classmethod
-    def apply_query(cls, pony_query, query: Query):
+    def apply_query(cls, pony_query, query: QueryFilter):
         if query is None:
             return pony_query
 
-        filtered_query = cls.apply_filters(pony_query, query.filters)
+        filtered_query = cls.apply_filters(pony_query, query.criteria)
         ordered_query = cls.apply_sorting(filtered_query, query.sort)
         paginated_query = cls.apply_pagination(ordered_query, query.pagination)
         return paginated_query
