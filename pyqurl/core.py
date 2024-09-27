@@ -29,7 +29,7 @@ class ArrayValueQueryCriterion(QueryCriterion):
 
 
 @dataclass
-class RangeValueQueryFilter(QueryCriterion):
+class RangeValueQueryCriterion(QueryCriterion):
     start: Any
     end: Any
 
@@ -127,7 +127,7 @@ def create_criterion(prop, op, value):
 
     elif op == RANGE:
         start, end = value if value is not None else (None, None, )
-        f = RangeValueQueryFilter(prop, op, start=start, end=end)
+        f = RangeValueQueryCriterion(prop, op, start=start, end=end)
 
     else:
         f = SingleValueQueryCriterion(prop, op, value[0])
