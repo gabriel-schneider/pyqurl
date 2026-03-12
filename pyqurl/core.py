@@ -149,6 +149,8 @@ def create_filters_from_dict(d: Dict):
         # Ensure value is a list
         if isinstance(value, List):
             value = ",".join(value).split(",")
+        elif isinstance(value, str):
+            value = value.split(",")
         else:
             value = [value]
 

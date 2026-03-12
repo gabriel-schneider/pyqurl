@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyqurl"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
 
 ]
 authors = [
-  { name="Gabriel Schneider", email="gabriel.schneider.almeida@gmail.com" },
+  { name="Gabriel Schneider", email="gabriel@foxen.com.br" },
 ]
 description = "Simple query string parser for LHS filtering, sorting and pagination"
 readme = "README.md"
